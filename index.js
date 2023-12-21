@@ -29,7 +29,29 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const mobileCollection = client.db('mobileDB').collection('mobiles');
-    
+
+
+
+    // mobile Collection get api
+    app.get('/phones', async(req, res)=> {
+        const filter = req.query;
+        // console.log(filter);
+        const query = {
+            $or: [
+                {name: {$regex: filter.search, $options: 'i'}},
+                {price: parseFloat(filter.search) || null},
+                {type: {$regex: filter.search, $options: 'i'}},
+                {processor: {$regex: filter.search, $options: 'i'}},
+                {memory: {$regex: filter.search, $options: 'i'}},
+                {OS: {$regex: filter.search, $options: 'i'}},
+            ]
+        };
+        const cursor = mobileCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
